@@ -239,12 +239,12 @@ export async function POST(req: Request) {
               query: z
                 .string()
                 .describe(
-                  'Exact user query as provided without modifications, paraphrasing, or any other alterations'
+                  'Exact user query as provided without modifications, paraphrasing, or any other alterations. Include the current date for temporal context: {{currentDate}}'
                 ),
             }),
             execute: traceable(
               async ({ query }) => {
-                // max number of characters to retrieve in the reranker
+                console.log('User query for elastic', query)
                 const law_retrieved_data = await retrieveAndFilterData(
                   query,
                   'greek_laws_collection',
