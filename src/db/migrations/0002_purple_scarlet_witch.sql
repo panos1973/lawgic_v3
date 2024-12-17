@@ -1,0 +1,1 @@
+ALTER TABLE "contract_chat_messages" RENAME COLUMN "case_study_id" TO "contract_chat_id";

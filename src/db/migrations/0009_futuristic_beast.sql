@@ -1,0 +1,1 @@
+ALTER TABLE "case_study_files" ADD COLUMN "file_blob" text;

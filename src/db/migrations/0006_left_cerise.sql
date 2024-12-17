@@ -1,0 +1,1 @@
+ALTER TABLE "contract_sections" DROP COLUMN IF EXISTS "section";
