@@ -217,7 +217,7 @@ export async function POST(req: Request) {
       // Get collection strings based on preferences
       const collectionStrings = getCollectionStrings(preferences, locale)
 
-      // Replace all template variables
+      // Replace all template variablesW
       let promptWithDate = LAW_CHAT_PROMPTS[locale]
         .replace('{{currentDate}}', formattedDate)
         .replace(
@@ -247,11 +247,11 @@ export async function POST(req: Request) {
                 // max number of characters to retrieve in the reranker
                 const law_retrieved_data = await retrieveAndFilterData(
                   query,
-                  'collection_law_embedddings_2024',
+                  'greek_laws_collection',
                   max_law_characters_v2,
                   'voyage-3'
                 )
-                console.log('answerLawQuestions', law_retrieved_data)
+                console.log('answerLawQuestions', law_retrieved_data.length)
                 let combined_retrieved_data = law_retrieved_data
                 if (includeGreekCourtDecisions) {
                   const pastcase_retrieved_data = await retrieveAndFilterData(

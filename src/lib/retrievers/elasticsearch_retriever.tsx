@@ -43,6 +43,8 @@ export async function elasticsearchRetrieverHybridSearch(
     const sourceFields =
       index === 'pastcase_collection'
         ? ['metadata.*', 'full_text']
+        : index === 'greek_laws_collection'
+        ? ['metadata.*', 'full_text', 'pageContent']
         : [
             'pageContent',
             'metadata.fek_title',
@@ -126,6 +128,56 @@ export async function elasticsearchRetrieverHybridSearch(
           : ''
 
         return [metadataString, fullText].filter(Boolean).join('\n')
+      })
+    } else if (index === 'greek_laws_collection') {
+      // Type for greek_laws_collection
+      type GreekLawSourceType = {
+        metadata?: {
+          court?: string
+          decision_number?: string
+          date?: string
+          case_type?: string
+          main_laws?: string
+          key_articles?: string
+          primary_issue?: string
+          monetary_amount?: string
+          currency?: string
+          important_dates?: string
+          procedure_type?: string
+          legal_field?: string
+          outcome_type?: string
+          court_level?: string
+          File_Name?: string
+          Page_URL?: string
+          PDF_URL?: string
+          PDF_URL_Saved_To?: string
+          summary?: string
+          chunk_id?: string
+        }
+        full_text?: string
+        pageContent?: string
+      }
+
+      return hits.map((hit) => {
+        const source = hit._source as GreekLawSourceType
+        const metadata = source?.metadata
+
+        const metadataString = metadata
+          ? Object.entries(metadata)
+              .map(([key, value]) => (value ? `${key}: ${value}` : ''))
+              .filter(Boolean)
+              .join('\n')
+          : ''
+
+        const content = [
+          metadataString,
+          source?.full_text ? `Full Text: ${source.full_text}` : '',
+          source?.pageContent ? `Page Content: ${source.pageContent}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n')
+
+        return content
       })
     } else {
       // Type for collection_law_embeddings
