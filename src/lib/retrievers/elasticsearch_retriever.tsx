@@ -1,5 +1,4 @@
 import { Client } from '@elastic/elasticsearch'
-import { OpenAIEmbeddings } from '@langchain/openai'
 import { VoyageAIClient, VoyageAI } from 'voyageai'
 
 // Create an Elasticsearch client
@@ -21,34 +20,23 @@ export async function elasticsearchRetrieverHybridSearch(
 ): Promise<string[]> {
   const {
     index = 'collection_law_embeddings',
+    model_name = 'voyage-3',
     knn_k = 50,
     knn_num_candidates = 100,
     rrf_rank_window_size = 50,
     rrf_rank_constant = 20,
   } = options
 
-  // Set default model based on index
-  const model_name =
-    options.model_name ||
-    (index === 'pastcase_collection' ? 'voyage-3' : 'text-embedding-3-large')
-
-  // Generate vector query using either OpenAI or Voyage
-  let vectorQuery
-  if (model_name === 'text-embedding-3-large') {
-    const model = new OpenAIEmbeddings({
-      apiKey: process.env.OPENAI_API_KEY!,
-      model: 'text-embedding-3-large',
-    })
-    vectorQuery = await model.embedQuery(searchQuery)
-  } else if (model_name === 'voyage-3') {
-    const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY! })
-    const voyage_response: VoyageAI.EmbedResponse = await client.embed({
-      model: model_name,
-      input: searchQuery,
-      inputType: 'query',
-    })
-    vectorQuery = voyage_response?.data?.[0]?.embedding
-  }
+  // Generate vector query using Voyage-3
+  const voyageClient = new VoyageAIClient({
+    apiKey: process.env.VOYAGE_API_KEY!,
+  })
+  const voyage_response: VoyageAI.EmbedResponse = await voyageClient.embed({
+    model: model_name,
+    input: searchQuery,
+    inputType: 'query',
+  })
+  const vectorQuery = voyage_response?.data?.[0]?.embedding
 
   try {
     // Define source fields based on index

@@ -245,23 +245,13 @@ export async function POST(req: Request) {
             execute: traceable(
               async ({ query }) => {
                 // max number of characters to retrieve in the reranker
-                const law_retrieved_data_v1 = await retrieveAndFilterData(
-                  query,
-                  'collection_law_embeddings',
-                  max_law_characters_v1,
-                  'text-embedding-3-large'
-                )
-                const law_retrieved_data_v2 = await retrieveAndFilterData(
+                const law_retrieved_data = await retrieveAndFilterData(
                   query,
                   'collection_law_embedddings_2024',
                   max_law_characters_v2,
                   'voyage-3'
                 )
-                const law_retrieved_data = [
-                  ...law_retrieved_data_v1,
-                  ...law_retrieved_data_v2,
-                ]
-                console.log('answerLawQuestions', law_retrieved_data.length)
+                console.log('answerLawQuestions', law_retrieved_data)
                 let combined_retrieved_data = law_retrieved_data
                 if (includeGreekCourtDecisions) {
                   const pastcase_retrieved_data = await retrieveAndFilterData(
