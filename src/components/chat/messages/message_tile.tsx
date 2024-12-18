@@ -64,38 +64,21 @@ const MessageTile: NextPage<Props> = ({
 
   // Parse the content and look for useful questions block
   const renderContentWithQuestions = (content: string) => {
-    const englishPattern =
-      /(?:<b>|<strong>|[*]{2}|__|\*\*|\#)?\s*Possible\s*(?:&nbsp;)?Useful\s*(?:&nbsp;)?Questions\s*(?:<\/b>|<\/strong>|[*]{2}|__|\*\*)?\s*[:.-]?\s*\n?/i
+    const englishMatch = content.match(/QuestionsE:\s*\[([\s\S]*?)\]/)
+    const greekMatch = content.match(/QuestionsG:\s*\[([\s\S]*?)\]/)
 
-    const greekPattern =
-      /(?:<b>|<strong>|[*]{2}|__|\*\*|\#)?\s*Προτεινόμενα\s*(?:&nbsp;)?επόμενα\s*(?:&nbsp;)?ερωτήματα\s*(?:<\/b>|<\/strong>|[*]{2}|__|\*\*)?\s*[:.-]?\s*\n?/i
+    const isEnglish = !!englishMatch
+    const questions = (isEnglish ? englishMatch : greekMatch)?.[1]
+      .split(',')
+      .map((q) => q.trim().replace(/['"]/g, ''))
+      .filter((q) => q.length > 0)
 
-    if (englishPattern.test(content) || greekPattern.test(content)) {
-      const isEnglish = englishPattern.test(content)
-      const parts = content.split(isEnglish ? englishPattern : greekPattern)
+    const mainContent = content.replace(/Questions[EG]:\s*\[([\s\S]*?)\]/, '')
 
-      parts[0] = parts[0]
-        .replace(
-          /\*\*([^*]+)\*\*/g,
-          '<b style="display:inline-block; margin-top:1rem; margin-bottom:0.5rem;">$1</b>'
-        )
-        .replace(
-          /(<b>.*?<\/b>)/g,
-          '<span style="display:inline-block; margin-top:1rem; margin-bottom:0.5rem;">$1</span>'
-        )
-        .replace(
-          /(<strong>.*?<\/strong>)/g,
-          '<span style="display:inline-block; margin-top:1rem; margin-bottom:0.5rem;">$1</span>'
-        )
-
-      const questionsSection = parts[1]
-        ?.split('\n')
-        .filter((q) => q.trim().length > 0)
-        .filter((q) => /[a-zA-Z0-9]/.test(q))
-
-      return (
-        <>
-          <Markdown>{parts[0]}</Markdown>
+    return (
+      <>
+        <Markdown>{mainContent}</Markdown>
+        {questions && questions.length > 0 && (
           <div className="mt-4">
             <b>
               {isEnglish
@@ -103,7 +86,7 @@ const MessageTile: NextPage<Props> = ({
                 : 'Πιθανές Χρήσιμες Ερωτήσεις:'}
             </b>
             <ul className="list-none list-inside mt-2 space-y-2">
-              {questionsSection.map((question, index) => (
+              {questions.map((question, index) => (
                 <li
                   key={index}
                   className="cursor-pointer"
@@ -114,10 +97,9 @@ const MessageTile: NextPage<Props> = ({
               ))}
             </ul>
           </div>
-        </>
-      )
-    }
-    return <Markdown>{content}</Markdown>
+        )}
+      </>
+    )
   }
 
   return (
